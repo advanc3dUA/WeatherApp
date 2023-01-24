@@ -2,7 +2,7 @@
 //  CitiesStore.swift
 //  WeatherKit
 //
-//  Created by Ben Scheirman on 9/18/20.
+//  Created by Ben Scheirman on 11/4/20.
 //
 
 import Foundation
@@ -15,19 +15,18 @@ public class CitiesStore {
         self.cities = cities
     }
     
-    private static var userDefaultsKey = "cities"
+    private static let userDefaultsKey = "cities"
     
     public static func load() -> CitiesStore {
         let decoder = JSONDecoder()
         guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else {
             return CitiesStore(cities: [])
         }
-        
         do {
             let cities = try decoder.decode([City].self, from: data)
             return CitiesStore(cities: cities)
         } catch {
-            print("Error loading cities: \(error)")
+            print("Error decoding cities: \(error)")
             return CitiesStore(cities: [])
         }
     }

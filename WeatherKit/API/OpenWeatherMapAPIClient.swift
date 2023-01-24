@@ -48,6 +48,7 @@ public class OpenWeatherMapAPIClient {
             .assumeHTTP()
             .responseData()
             .decoding(R.self, decoder: decoder)
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 }

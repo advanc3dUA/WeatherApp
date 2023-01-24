@@ -42,6 +42,7 @@ extension CityCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        
         cancellables = []
         nameLabel.text = ""
         localityLabel.text = ""

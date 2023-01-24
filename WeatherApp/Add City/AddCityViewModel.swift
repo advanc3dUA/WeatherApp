@@ -12,11 +12,11 @@ import MapKit
 import CoreLocation
 
 class AddCityViewModel: NSObject {
-    private var completionsSubject = CurrentValueSubject<[MKLocalSearchCompletion], Never>([])
-    
     enum Errors: Error {
         case geolocationFailed
     }
+    
+    private var completionsSubject = CurrentValueSubject<[MKLocalSearchCompletion], Never>([])
     
     @Published
     var results: [AddCityViewController.Result] = []
@@ -31,15 +31,13 @@ class AddCityViewModel: NSObject {
     override init() {
         super.init()
         
-        completionsSubject
-            .map { completions in
-                completions
-                    .filter { $0.title.contains(",") }
-                    .map { AddCityViewController.Result(title: $0.title, subtitle: $0.subtitle) }
-            }
-            .assign(to: &$results)
-        
-       
+        completionsSubject.map { completions in
+            completions
+                .filter { $0.title.contains(",") }
+                .map { AddCityViewController.Result(title: $0.title, subtitle: $0.subtitle)}
+        }
+        .assign(to: &$results)
+            
         searchCompleter.delegate = self
     }
     
@@ -47,34 +45,6 @@ class AddCityViewModel: NSObject {
         didSet {
             searchCompleter.queryFragment = searchTerm ?? ""
         }
-    }
-    
-    func geolocate(selectedIndex index: Int) -> AnyPublisher<City, Error> {
-        assert(index < results.count)
-        let result = results[index]
-        showSpinner = true
-        geocoder.cancelGeocode()
-        return Future { [self] promise in
-            self.geocoder.geocodeAddressString(result.title) { (placemarks, error) in
-                assert(Thread.isMainThread)
-                self.showSpinner = false
-                if let placemark = placemarks?.first {
-                    promise(.success(placemark))
-                } else {
-                    promise(.failure(Errors.geolocationFailed))
-                }
-                
-            }
-        }
-        .map { (placemark: CLPlacemark) -> City in
-            City(
-                name: placemark.name ?? placemark.locality ?? "(unknown city)",
-                locality: placemark.administrativeArea ?? placemark.country ?? "",
-                latitude: placemark.location?.coordinate.latitude ?? 0,
-                longitude: placemark.location?.coordinate.longitude ?? 0
-            )
-        }
-        .eraseToAnyPublisher()
     }
     
     var snapshotPublisher: AnyPublisher<NSDiffableDataSourceSnapshot<AddCityViewController.Section, AddCityViewController.Result>, Never> {
@@ -88,14 +58,37 @@ class AddCityViewModel: NSObject {
             .eraseToAnyPublisher()
     }
     
-    func update(with results: [MKLocalSearchCompletion]) {
-        completionsSubject.send(results)
+    func geolocate(selectedIndex index: Int) -> AnyPublisher<City, Error> {
+        assert(index < results.count)
+        let result = results[index]
+        showSpinner = true
+        geocoder.cancelGeocode()
+
+        return Future { promise in
+            self.geocoder.geocodeAddressString(result.title) { (placemarks, error) in
+                assert(Thread.isMainThread)
+                self.showSpinner = false
+                if let placemark = placemarks?.first {
+                    promise(.success(placemark))
+                } else {
+                    promise(.failure(Errors.geolocationFailed))
+                }
+            }
+        }
+        .map { (placemark: CLPlacemark) -> City in
+            City(
+                name: placemark.name ?? placemark.locality ?? "(unknown city)",
+                locality: placemark.administrativeArea ?? placemark.country ?? "",
+                latitude: placemark.location?.coordinate.latitude ?? 0,
+                longitude: placemark.location?.coordinate.longitude ?? 0)
+        }
+        .eraseToAnyPublisher()
     }
 }
 
 extension AddCityViewModel: MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        completionsSubject.send(completer.results)        
+        completionsSubject.send(completer.results)
     }
     
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {

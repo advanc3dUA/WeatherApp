@@ -21,18 +21,17 @@ class MyCitiesViewModel {
         tempFormatter.numberFormatter.maximumFractionDigits = 0
     }
     
-    private var appState: AppState {
-        Current.appState
-    }
-    
     private var citiesStore: CitiesStore {
         Current.citiesStore
     }
     
     private var cities: AnyPublisher<[CityViewModel], Never> {
-        appState.$cityWeathers
-            .map { [tempFormatter] (weathers: [CityWeather]) in
-                weathers.map { CityViewModel(city: $0.city, weather: $0.weather, tempFormatter: tempFormatter)
+        citiesStore.$cities
+            .map { [tempFormatter] cities in
+                cities.map { city in
+                    CityViewModel(city: city,
+                                  weather: Just(nil).eraseToAnyPublisher(),
+                                  tempFormatter: tempFormatter)
                 }
             }
             .eraseToAnyPublisher()
@@ -41,15 +40,11 @@ class MyCitiesViewModel {
     func contextMenu(for index: Int) -> UIMenu {
         let city = citiesStore.cities[index]
         let action = UIAction(title: "Delete City", attributes: [.destructive]) { [weak self] action in
-            self?.remove(city: city)
+            self?.citiesStore.remove(city)
         }
         
-        let menu = UIMenu(title: "\(city.name)", options: [], children: [action])
+        let menu = UIMenu(title: city.name, options: [], children: [action])
         return menu
-    }
-    
-    func remove(city: City) {
-        citiesStore.remove(city)
     }
     
     var snapshotPublisher: AnyPublisher<NSDiffableDataSourceSnapshot<Section, CityViewModel>, Never> {

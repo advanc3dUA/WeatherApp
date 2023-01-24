@@ -11,7 +11,6 @@ import MapKit
 import Combine
 import WeatherKit
 
-
 class AddCityViewController: UITableViewController {
     
     enum Section: Int {
@@ -44,7 +43,9 @@ class AddCityViewController: UITableViewController {
         viewModel.$showSpinner
             .sink { [unowned self] in
                 if $0 {
-                    navigationItem.rightBarButtonItem = UIBarButtonItem(customView: UIActivityIndicatorView())
+                    let indicator = UIActivityIndicatorView()
+                    navigationItem.rightBarButtonItem  = UIBarButtonItem(customView: indicator)
+                    indicator.startAnimating()
                 } else {
                     navigationItem.rightBarButtonItem = nil
                 }
@@ -85,15 +86,14 @@ class AddCityViewController: UITableViewController {
     // MARK: - UITableViewDelegate
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        navigationItem.searchController?.isActive = false
         viewModel.geolocate(selectedIndex: indexPath.row)
             .map { $0 as City? }
             .catch { error -> Just<City?> in
-                print("Unable to geocode city name: \(error)")
+                print("Unable to geocode \(error)")
                 return Just(nil)
             }
-            .compactMap {
-                $0
-            }
+            .compactMap { $0 }
             .assign(to: &$chosenCity)
     }
 }

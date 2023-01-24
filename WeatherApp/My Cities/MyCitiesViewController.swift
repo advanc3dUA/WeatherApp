@@ -10,7 +10,7 @@ import WeatherKit
 import Combine
 
 class MyCitiesViewController: UICollectionViewController {
-    
+
     private var viewModel = MyCitiesViewModel()
     private var chosenCityCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
@@ -43,15 +43,16 @@ class MyCitiesViewController: UICollectionViewController {
         let addCityNav = UINavigationController(rootViewController: addCityVC)
         present(addCityNav, animated: true, completion: nil)
         
-        chosenCityCancellable = addCityVC
-            .$chosenCity
+        chosenCityCancellable = addCityVC.$chosenCity
             .dropFirst()
-            .sink(receiveValue: { city in
+            .sink { city in
                 addCityNav.dismiss(animated: true, completion: nil)
+             
                 if let city = city {
+                    print("Chosen city: \(city)")
                     Current.citiesStore.add(city)
                 }
-            })
+            }
     }
     
     // MARK: - UICollectionViewDelegate
@@ -59,6 +60,7 @@ class MyCitiesViewController: UICollectionViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showCity" {
             guard let index = collectionView.indexPathsForSelectedItems?.first?.row else { return }
+            
             let city = Current.citiesStore.cities[index]
             let cityVC = segue.destination as! CityWeatherViewController
             cityVC.city = city

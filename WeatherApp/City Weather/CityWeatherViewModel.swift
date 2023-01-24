@@ -30,7 +30,12 @@ class CityWeatherViewModel {
     @Published var hourlyForecast: [HourlyForecastViewModel] = []
     
     private lazy var weatherPublisher: AnyPublisher<OneCallResult?, Never> = {
-        Current.weatherManager.weatherPublisher(for: city)
+        Current.weatherAPI.oneCallForecast(lat: city.latitude, long: city.longitude)
+            .print("WEATHER PUBLISHER")
+            .map { $0 as OneCallResult? }
+            .replaceError(with: nil)
+            .share()
+            .eraseToAnyPublisher()
     }()
     
     init(city: City) {
@@ -102,7 +107,6 @@ class CityWeatherViewModel {
                 return WeatherConditionImage.image(for: condition).withRenderingMode(.alwaysTemplate)
             }
             .eraseToAnyPublisher()
-            
     }
     
     var currentHighLowTemperature: AnyPublisher<String?, Never> {

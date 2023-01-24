@@ -19,12 +19,6 @@ class CityWeatherViewController: UIViewController {
         case weeklyForecast
     }
     
-    enum SectionData {
-        case currentWeather(CityWeatherViewModel)
-        case weeklyForecast(DailyForecastViewModel)
-        case hourlyForecast(HourlyForecastViewModel)
-    }
-    
     var city: City! {
         didSet {
             viewModel = CityWeatherViewModel(city: city!)
@@ -34,7 +28,6 @@ class CityWeatherViewController: UIViewController {
     private var viewModel: CityWeatherViewModel!
     private var cancellables = Set<AnyCancellable>()
     
-    // cache the results from the view model, as they are send in _willChange_
     private var dailyForecasts: [DailyForecastViewModel] = [] {
         didSet {
             collectionView.reloadSections(IndexSet([Section.weeklyForecast.rawValue]))
@@ -62,18 +55,29 @@ class CityWeatherViewController: UIViewController {
     private func setupCollectionView() {
         collectionView.collectionViewLayout = CityWeatherLayout.createLayout()
         collectionView.backgroundColor = .clear
-                        
+        
         viewModel.$dailyForecast
-            .sink { [unowned self] dailyForecasts in
-                self.dailyForecasts = dailyForecasts
+            .sink { [unowned self] in
+                dailyForecasts = $0
+            }
+            .store(in: &cancellables)
+
+        viewModel.$hourlyForecast
+            .sink { [unowned self] in
+                hourlyForecasts = $0
             }
             .store(in: &cancellables)
         
-        viewModel.$hourlyForecast
-            .sink { [unowned self] hourlyForecasts in
-                self.hourlyForecasts = hourlyForecasts
-            }
-            .store(in: &cancellables)
+        
+//        let df = viewModel.$dailyForecast.map { _ in () }
+//        let hf = viewModel.$hourlyForecast.map { _ in () }
+//
+//        df.merge(with: hf)
+//            .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
+//            .sink { [unowned self] _ in
+//                collectionView.reloadData()
+//            }
+//            .store(in: &cancellables)
     }
 }
 
@@ -100,12 +104,16 @@ extension CityWeatherViewController: UICollectionViewDataSource {
             
         case .weeklyForecast:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DailyWeatherCell", for: indexPath) as! DailyWeatherCell
+            
             cell.update(with: dailyForecasts[indexPath.row])
+            
             return cell
             
         case .hourlyForecast:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HourlyWeatherCell", for: indexPath) as! HourlyWeatherCell
+            
             cell.update(with: hourlyForecasts[indexPath.row])
+            
             return cell
             
         default: return UICollectionViewCell()
