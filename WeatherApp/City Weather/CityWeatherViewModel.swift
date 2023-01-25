@@ -22,7 +22,6 @@ class CityWeatherViewModel {
     }()
     
     private let city: City
-    private let oneCallCache: TimedCache<OneCallResult>
     private let tempFormatter: MeasurementFormatter
     
     @Published var dailyForecast: [DailyForecastViewModel] = []
@@ -30,17 +29,11 @@ class CityWeatherViewModel {
     @Published var hourlyForecast: [HourlyForecastViewModel] = []
     
     private lazy var weatherPublisher: AnyPublisher<OneCallResult?, Never> = {
-        Current.weatherAPI.oneCallForecast(lat: city.latitude, long: city.longitude)
-            .print("WEATHER PUBLISHER")
-            .map { $0 as OneCallResult? }
-            .replaceError(with: nil)
-            .share()
-            .eraseToAnyPublisher()
+        Current.weatherManager.weatherPublisher(for: city)
     }()
     
     init(city: City) {
         self.city = city
-        oneCallCache = TimedCache()
         
         tempFormatter = MeasurementFormatter()
         tempFormatter.unitStyle = .short

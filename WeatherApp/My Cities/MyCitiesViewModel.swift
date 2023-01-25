@@ -30,7 +30,7 @@ class MyCitiesViewModel {
             .map { [tempFormatter] cities in
                 cities.map { city in
                     CityViewModel(city: city,
-                                  weather: Just(nil).eraseToAnyPublisher(),
+                                  weather: Current.weatherManager.weatherPublisher(for: city),
                                   tempFormatter: tempFormatter)
                 }
             }

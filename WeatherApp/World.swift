@@ -11,9 +11,11 @@ import WeatherKit
 struct World {
     var weatherAPI: OpenWeatherMapAPIClient
     var citiesStore: CitiesStore
+    var weatherManager: WeatherManager
 }
 
 var Current = World(
     weatherAPI: OpenWeatherMapAPIClient(),
-    citiesStore: CitiesStore.load()
+    citiesStore: CitiesStore.load(),
+    weatherManager: WeatherManager()
 )
