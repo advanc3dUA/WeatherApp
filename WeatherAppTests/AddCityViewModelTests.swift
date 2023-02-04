@@ -12,10 +12,10 @@ import WeatherKit
 @testable import WeatherApp
 
 class TestLocalSearch: LocalSearchCompleter {
-    var lastQuery: String?
+    var queries: [String] = []
     
     func search(with query: String) {
-        self.lastQuery = query
+        queries.append(query)
     }
     
     var subject = PassthroughSubject<[LocalSearchCompletion], Never>()
@@ -40,5 +40,18 @@ class AddCityViewModelCityTests: CombineTestCase {
     override func tearDown() {
         super.tearDown()
         TestEnvironment.pop()
+    }
+    
+    func testSetSearchTerm() {
+        viewModel.searchTerm = "Houston"
+        viewModel.searchTerm = "Dallas"
+        XCTAssertEqual(localSearch.queries, ["Houston", "Dallas"])
+    }
+    
+    func testFiltersOutResultsThatDontLookLikeCities() {
+        let houstonResult = LocalSearchCompletion(title: "Houston, TX", subTitle: "")
+        let houstonRestaurantResult = LocalSearchCompletion(title: "Houston's Restaurant", subTitle: "")
+        localSearch.subject.send([houstonResult, houstonRestaurantResult])
+        XCTAssertEqual(viewModel.results, [houstonResult])
     }
 }
