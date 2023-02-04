@@ -8,7 +8,6 @@
 import UIKit
 import Combine
 import WeatherKit
-import MapKit
 import CoreLocation
 
 class AddCityViewModel: NSObject {
@@ -16,41 +15,37 @@ class AddCityViewModel: NSObject {
         case geolocationFailed
     }
     
-    private var completionsSubject = CurrentValueSubject<[MKLocalSearchCompletion], Never>([])
-    
     @Published
-    var results: [AddCityViewController.Result] = []
+    var results: [LocalSearchCompletion] = []
     
     @Published
     var showSpinner: Bool = false
     
-    private var searchCompleter = MKLocalSearchCompleter()
+    private var localSearch: LocalSearchCompleter { Current.localSearch }
     private var geocoder = CLGeocoder()
     private var cancellables = Set<AnyCancellable>()
     
     override init() {
         super.init()
         
-        completionsSubject.map { completions in
+        localSearch.results
+            .map { completions in
             completions
                 .filter { $0.title.contains(",") }
-                .map { AddCityViewController.Result(title: $0.title, subtitle: $0.subtitle)}
         }
         .assign(to: &$results)
-            
-        searchCompleter.delegate = self
     }
     
     var searchTerm: String? {
         didSet {
-            searchCompleter.queryFragment = searchTerm ?? ""
+            localSearch.search(with: searchTerm ?? "")
         }
     }
     
-    var snapshotPublisher: AnyPublisher<NSDiffableDataSourceSnapshot<AddCityViewController.Section, AddCityViewController.Result>, Never> {
+    var snapshotPublisher: AnyPublisher<NSDiffableDataSourceSnapshot<AddCityViewController.Section, LocalSearchCompletion>, Never> {
         $results
             .map { results in
-                var snapshot = NSDiffableDataSourceSnapshot<AddCityViewController.Section, AddCityViewController.Result>()
+                var snapshot = NSDiffableDataSourceSnapshot<AddCityViewController.Section, LocalSearchCompletion>()
                 snapshot.appendSections([.results])
                 snapshot.appendItems(results)
                 return snapshot
@@ -83,15 +78,5 @@ class AddCityViewModel: NSObject {
                 longitude: placemark.location?.coordinate.longitude ?? 0)
         }
         .eraseToAnyPublisher()
-    }
-}
-
-extension AddCityViewModel: MKLocalSearchCompleterDelegate {
-    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        completionsSubject.send(completer.results)
-    }
-    
-    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
-        print("Error: \(error)")
     }
 }

@@ -22,13 +22,7 @@ class AddCityViewController: UITableViewController {
     @Published
     private(set) var chosenCity: City?
     
-    struct Result: Identifiable, Equatable, Hashable {
-        let id = UUID()
-        let title: String
-        let subtitle: String
-    }
-    
-    private var diffableDatasource: UITableViewDiffableDataSource<Section, Result>!
+    private var diffableDatasource: UITableViewDiffableDataSource<Section, LocalSearchCompletion>!
     private var cancellables = Set<AnyCancellable>()
     
     override func viewDidLoad() {
@@ -64,7 +58,7 @@ class AddCityViewController: UITableViewController {
         diffableDatasource = UITableViewDiffableDataSource(tableView: tableView, cellProvider: { (tv, indexPath, result) -> UITableViewCell? in
             let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
             cell.textLabel?.text = result.title
-            cell.detailTextLabel?.text = result.subtitle
+            cell.detailTextLabel?.text = result.subTitle
             return cell
         })
     }
