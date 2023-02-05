@@ -62,7 +62,13 @@ class AddCityViewModelCityTests: CombineTestCase {
     }
     
     func testGeocodingFails() {
+        viewModel.results = [LocalSearchCompletion(title: "Houston, TX", subTitle: "")]
+        let pub = viewModel.geolocate(selectedIndex: 0)
         
+        struct SomeError: Error { }
+        assertPublisher(pub, failsWithError: AddCityViewModel.Errors.geolocationFailed) {
+            geocoder.subject.send(completion: .failure(SomeError()))
+        }
     }
     
     func testGeocodingProducesNoResults() {
