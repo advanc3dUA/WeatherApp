@@ -22,7 +22,7 @@ class AddCityViewModel: NSObject {
     var showSpinner: Bool = false
     
     private var localSearch: LocalSearchCompleter { Current.localSearch }
-    private var geocoder = CLGeocoder()
+    private var geocoder: Geocoder { Current.geocoder }
     private var cancellables = Set<AnyCancellable>()
     
     override init() {
@@ -53,30 +53,28 @@ class AddCityViewModel: NSObject {
             .eraseToAnyPublisher()
     }
     
-    func geolocate(selectedIndex index: Int) -> AnyPublisher<City, Error> {
+    func geolocate(selectedIndex index: Int) -> AnyPublisher<City, Errors> {
         assert(index < results.count)
         let result = results[index]
         showSpinner = true
-        geocoder.cancelGeocode()
-
-        return Future { promise in
-            self.geocoder.geocodeAddressString(result.title) { (placemarks, error) in
-                assert(Thread.isMainThread)
+        
+        return geocoder.geocodeAddress(address: result.title)
+            .handleEvents(receiveCompletion: { _ in
                 self.showSpinner = false
-                if let placemark = placemarks?.first {
-                    promise(.success(placemark))
-                } else {
-                    promise(.failure(Errors.geolocationFailed))
-                }
+            })
+            .mapError { e in
+                print("Geolocation error: \(e)")
+                return Errors.geolocationFailed
             }
-        }
-        .map { (placemark: CLPlacemark) -> City in
-            City(
-                name: placemark.name ?? placemark.locality ?? "(unknown city)",
-                locality: placemark.administrativeArea ?? placemark.country ?? "",
-                latitude: placemark.location?.coordinate.latitude ?? 0,
-                longitude: placemark.location?.coordinate.longitude ?? 0)
-        }
-        .eraseToAnyPublisher()
+            .compactMap { $0.first }
+            .map { (placemark: CLPlacemark) -> City in
+                City(
+                    name: placemark.name ?? placemark.locality ?? "(unknown city)",
+                    locality: placemark.administrativeArea ?? placemark.country ?? "",
+                    latitude: placemark.location?.coordinate.latitude ?? 0,
+                    longitude: placemark.location?.coordinate.longitude ?? 0
+                )
+            }
+            .eraseToAnyPublisher()
     }
 }
