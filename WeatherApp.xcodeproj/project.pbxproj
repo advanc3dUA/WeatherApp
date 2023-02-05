@@ -48,6 +48,8 @@
 		B5E493A6251562B30080D3E3 /* URLHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E493A32515620D0080D3E3 /* URLHelpers.swift */; };
 		BF2165F1298FABB20034E9C0 /* Geocoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2165F0298FABB20034E9C0 /* Geocoder.swift */; };
 		BF2165F3298FAC5B0034E9C0 /* CoreLocationGeocoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2165F2298FAC5B0034E9C0 /* CoreLocationGeocoder.swift */; };
+		BF2165F5298FB1EA0034E9C0 /* TestLocalSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2165F4298FB1EA0034E9C0 /* TestLocalSearch.swift */; };
+		BF2165F7298FB3F00034E9C0 /* TestGeocoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2165F6298FB3F00034E9C0 /* TestGeocoder.swift */; };
 		BF38013A298E88260026EFDA /* WeatherAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF380139298E88260026EFDA /* WeatherAppTests.swift */; };
 		BF380141298E883D0026EFDA /* AddCityViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF380140298E883D0026EFDA /* AddCityViewModelTests.swift */; };
 		BF380143298E88790026EFDA /* CombineTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF380142298E88790026EFDA /* CombineTestCase.swift */; };
@@ -135,6 +137,8 @@
 		B5E493A32515620D0080D3E3 /* URLHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLHelpers.swift; sourceTree = "<group>"; };
 		BF2165F0298FABB20034E9C0 /* Geocoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geocoder.swift; sourceTree = "<group>"; };
 		BF2165F2298FAC5B0034E9C0 /* CoreLocationGeocoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreLocationGeocoder.swift; sourceTree = "<group>"; };
+		BF2165F4298FB1EA0034E9C0 /* TestLocalSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestLocalSearch.swift; sourceTree = "<group>"; };
+		BF2165F6298FB3F00034E9C0 /* TestGeocoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGeocoder.swift; sourceTree = "<group>"; };
 		BF380137298E88260026EFDA /* WeatherAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WeatherAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF380139298E88260026EFDA /* WeatherAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAppTests.swift; sourceTree = "<group>"; };
 		BF380140298E883D0026EFDA /* AddCityViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCityViewModelTests.swift; sourceTree = "<group>"; };
@@ -363,6 +367,8 @@
 			isa = PBXGroup;
 			children = (
 				BF380145298E8D5A0026EFDA /* TestEnvironment.swift */,
+				BF2165F4298FB1EA0034E9C0 /* TestLocalSearch.swift */,
+				BF2165F6298FB3F00034E9C0 /* TestGeocoder.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -578,8 +584,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF2165F5298FB1EA0034E9C0 /* TestLocalSearch.swift in Sources */,
 				BF380143298E88790026EFDA /* CombineTestCase.swift in Sources */,
 				BF38013A298E88260026EFDA /* WeatherAppTests.swift in Sources */,
+				BF2165F7298FB3F00034E9C0 /* TestGeocoder.swift in Sources */,
 				BF380146298E8D5A0026EFDA /* TestEnvironment.swift in Sources */,
 				BF380141298E883D0026EFDA /* AddCityViewModelTests.swift in Sources */,
 			);

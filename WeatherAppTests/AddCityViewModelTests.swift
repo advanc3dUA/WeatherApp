@@ -11,28 +11,17 @@ import XCTest
 import WeatherKit
 @testable import WeatherApp
 
-class TestLocalSearch: LocalSearchCompleter {
-    var queries: [String] = []
-    
-    func search(with query: String) {
-        queries.append(query)
-    }
-    
-    var subject = PassthroughSubject<[LocalSearchCompletion], Never>()
-    var results: AnyPublisher<[LocalSearchCompletion], Never> {
-        subject.eraseToAnyPublisher()
-    }
-}
-
 class AddCityViewModelCityTests: CombineTestCase {
     var viewModel: AddCityViewModel!
     var localSearch: TestLocalSearch!
+    var geocoder: TestGeocoder!
     
     override func setUp() {
         super.setUp()
         localSearch = TestLocalSearch()
         TestEnvironment.push()
         Current.localSearch = localSearch
+        Current.geocoder = geocoder
         
         viewModel = AddCityViewModel()
     }
