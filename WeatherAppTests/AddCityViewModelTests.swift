@@ -81,6 +81,19 @@ class AddCityViewModelCityTests: CombineTestCase {
             geocoder.subject.send(completion: .finished)
         }
     }
+    
+    func testGeocodingManagesSpinnerState() {
+        XCTAssertFalse(viewModel.showSpinner)
+        viewModel.results = [LocalSearchCompletion(title: "Houston, TX", subTitle: "")]
+        viewModel.geolocate(selectedIndex: 0)
+            .assertNoFailure()
+            .sink { _ in }
+            .store(in: &cancellables)
+        
+        XCTAssertTrue(viewModel.showSpinner)
+        geocoder.subject.send(completion: .finished)
+        XCTAssertFalse(viewModel.showSpinner)
+    }
 }
 
 class TestPlacemark: CLPlacemark {
