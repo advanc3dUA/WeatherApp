@@ -9,6 +9,8 @@ import Foundation
 import Combine
 import XCTest
 import WeatherKit
+import CoreLocation
+import MapKit
 @testable import WeatherApp
 
 class AddCityViewModelCityTests: CombineTestCase {
@@ -19,6 +21,7 @@ class AddCityViewModelCityTests: CombineTestCase {
     override func setUp() {
         super.setUp()
         localSearch = TestLocalSearch()
+        geocoder = TestGeocoder()
         TestEnvironment.push()
         Current.localSearch = localSearch
         Current.geocoder = geocoder
@@ -43,4 +46,45 @@ class AddCityViewModelCityTests: CombineTestCase {
         localSearch.subject.send([houstonResult, houstonRestaurantResult])
         XCTAssertEqual(viewModel.results, [houstonResult])
     }
+    
+    func testGeocodesResultIntoCity() {
+        viewModel.results = [LocalSearchCompletion(title: "Houston, TX", subTitle: "")]
+        let pub = viewModel.geolocate(selectedIndex: 0)
+            .assertNoFailure()
+        let exprectedCity = City(name: "Houston", locality: "TX", latitude: 29, longitude: -95)
+        let houstonPlacemark = TestPlacemark(coordinate: CLLocationCoordinate2D(latitude: 29, longitude: -95), name: "Houston", locality: "TX")
+        
+        assertPublisher(pub, produces: exprectedCity) {
+            geocoder.subject.send([houstonPlacemark])
+            geocoder.subject.send(completion: .finished)
+        }
+        
+    }
+    
+    func testGeocodingFails() {
+        
+    }
+    
+    func testGeocodingProducesNoResults() {
+        
+    }
+}
+
+class TestPlacemark: CLPlacemark {
+    private var _name: String
+    private var _locality: String
+    
+    init(coordinate: CLLocationCoordinate2D, name: String, locality: String) {
+        let mkPlacemark = MKPlacemark(coordinate: coordinate)
+        _name = name
+        _locality = locality
+        super.init(placemark: mkPlacemark as CLPlacemark)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override var name: String? { _name }
+    override var administrativeArea: String? { _locality }
 }
